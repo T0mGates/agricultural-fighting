@@ -67,6 +67,10 @@ public class GameManager : MonoBehaviour
     private int chariotWarCost = 300;
     private int chariotWizCost = 0;
     private int chariotPriestCost = 0;
+
+    private int prevWarValue = 0;
+    private int prevWizValue = 0;
+    private int prevPriestValue = 0;
     // Start is called before the first frame update
     void Start()
     {
@@ -86,18 +90,18 @@ public class GameManager : MonoBehaviour
             priest.AddUnits(-chariotPriestCost);
             chariotCap = (int)(chariotCap * 1.5f);
 
-            chariotWarCost *= 3;
+            chariotWarCost = (int)(chariotWarCost * 2.5f);
             if(chariotWizCost == 0 && chariotWarCost >= 2000){
                 chariotWizCost = 200;
             }
             else{
-                chariotWizCost = (int)(chariotWizCost * 2.5f);
+                chariotWizCost = (int)(chariotWizCost * 1.95f);
             }
-            if(chariotPriestCost == 0 && chariotPriestCost >= 2000){
-                chariotWizCost = 150;
+            if(chariotPriestCost == 0 && chariotWizCost >= 2000){
+                chariotPriestCost = 150;
             }
             else{
-                chariotWizCost = (int)(chariotWizCost * 1.9f);
+                chariotPriestCost = (int)(chariotPriestCost * 1.75f);
             }
         }
         UpdateText();
@@ -125,12 +129,50 @@ public class GameManager : MonoBehaviour
     public void MainUIScreen(){
         battleScreen.SetActive(false);
         mainUIScreen.SetActive(true);
+        ResetSliders();
     }
 
-    public void ChangeSliderValue(){
+    private void ResetSliders(){
+        warriorSlider.value = 0;
+        prevWarValue = 0;
+        wizardSlider.value = 0;
+        prevWizValue = 0;
+        priestSlider.value = 0;
+        prevPriestValue = 0;
+    }
+
+    private bool SliderValuesOverCap(){
+        return warriorSlider.value + wizardSlider.value + priestSlider.value > chariotCap;
+    }
+
+    public void ChangeWarSliderValue(){
+        if(!SliderValuesOverCap()){
+            prevWarValue = (int) warriorSlider.value;
+        }
+        else{
+            warriorSlider.value = prevWarValue;
+        }
         numWarriorsText.text = warriorSlider.value.ToString();
-        numPriestsText.text = priestSlider.value.ToString();
+    }
+
+    public void ChangeWizSliderValue(){
+        if(!SliderValuesOverCap()){
+            prevWizValue = (int) wizardSlider.value;
+        }
+        else{
+            wizardSlider.value = prevWizValue;
+        }
         numWizardsText.text = wizardSlider.value.ToString();
+    }
+
+    public void ChangePriestSliderValue(){
+        if(!SliderValuesOverCap()){
+            prevPriestValue = (int) priestSlider.value;
+        }
+        else{
+            priestSlider.value = prevPriestValue;
+        }
+        numPriestsText.text = priestSlider.value.ToString();
     }
 
     public void UpdateText(){
