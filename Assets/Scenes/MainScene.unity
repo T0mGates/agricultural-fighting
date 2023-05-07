@@ -1597,8 +1597,8 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 864486137}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: BattleScreen
-        m_Mode: 3
+        m_MethodName: StartBattle
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -2007,7 +2007,7 @@ MonoBehaviour:
   atk: 0
   def: 1
   aoe: 1
-  healing: 4
+  healing: 1
   atkText: {fileID: 777142221}
   defText: {fileID: 747993065}
   aoeText: {fileID: 2068795752}
@@ -2423,8 +2423,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10d4ac07d7396904d9e07bab8654176f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  atk: 4
-  def: 2
+  atk: 1
+  def: 1
   aoe: 0
   healing: 0
   atkText: {fileID: 2117896209}
@@ -4697,10 +4697,18 @@ MonoBehaviour:
   - array:
     - 50
     - 50
+  - array:
+    - 20
+    - 70
+    - 10
   rewardsNames:
   - array:
     - +Warrior Atk
     - +Warrior Def
+  - array:
+    - +Wizard Atk
+    - +Warrior Def
+    - ++Wizard AOE
   warrior: {fileID: 407474744}
   wizard: {fileID: 1701681151}
   priest: {fileID: 287527595}
@@ -9917,7 +9925,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   atk: 1
   def: 1
-  aoe: 3
+  aoe: 1
   healing: 0
   atkText: {fileID: 501396050}
   defText: {fileID: 1587200959}

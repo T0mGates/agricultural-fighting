@@ -58,4 +58,20 @@ public class Unit : MonoBehaviour
     public int GetNumUnits(){
         return numUnits;
     }
+
+    public int GetAtk(){
+        return atk;
+    }
+
+    public int GetDef(){
+        return def;
+    }
+
+    public int GetAOE(){
+        return aoe;
+    }
+
+    public int GetHealing(){
+        return healing;
+    }
 }

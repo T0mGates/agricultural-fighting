@@ -196,4 +196,97 @@ public class GameManager : MonoBehaviour
             priestObj.SetActive(true);
         }
     }
+
+    private float PercentUnitsLeft(int units, float survivability, int monsterAtk, float unitEfficiency){
+        float result = Mathf.Log(units) * (-1 * unitEfficiency) / (Mathf.Log(Mathf.Pow(monsterAtk, survivability)) - Mathf.Log(monsterAtk));
+        result = ((1-result) - (Mathf.Log(monsterAtk) / (Mathf.Log(monsterAtk*survivability) - Mathf.Log(monsterAtk))));
+        return result;
+    }
+
+    public void StartBattle(){
+        switch(curBattleIndex){
+            case 0:
+                FightSlime();
+                break;
+        }
+        wizardSlider.value = 0;
+        warriorSlider.value = 0;
+        priestSlider.value = 0;
+        prevPriestValue = 0;
+        prevWarValue = 0;
+        prevWizValue = 0;
+    }
+
+    private float Fight(int monsThreshold, int monsDefense, int monsAttack, int monsNumUnitEfficiency, int healingEfficiency, int defenseEfficiency, int monsAtkEfficiency, int monsAOEEfficiency){
+        float x = (warriorSlider.value * warrior.GetAtk()) + (wizardSlider.value * wizard.GetAtk()) + (priestSlider.value * priest.GetAtk());
+        float a = monsDefense;
+        float z = monsAtkEfficiency;
+
+        float y = (x * (x - a))/z;
+
+        x = (warriorSlider.value * warrior.GetAOE()) + (wizardSlider.value * wizard.GetAOE()) + (priestSlider.value * priest.GetAOE());
+        a = monsDefense;
+        z = monsAOEEfficiency;
+
+        float yPrime = (x * (x + a))/z;
+
+        if((yPrime + y) * (1 + ((priest.GetHealing() * priestSlider.value) * healingEfficiency)) > monsThreshold){
+            int numUnits = (int)(warriorSlider.value + priestSlider.value + wizardSlider.value);
+            float survivabilityValue = ((warrior.GetDef()*warriorSlider.value + wizard.GetDef()*wizardSlider.value + priest.GetDef()*priestSlider.value) * defenseEfficiency) + ((warrior.GetHealing()*warriorSlider.value + wizard.GetHealing()*wizardSlider.value + priest.GetHealing()*priestSlider.value) * healingEfficiency);
+            y = PercentUnitsLeft(numUnits, survivabilityValue, monsAttack, monsNumUnitEfficiency);
+            if(y <= 0){
+                return 0;
+            }      
+            else{
+                return y;
+            }
+        }
+                
+        else{
+            return 0;
+        }
+    }
+
+    private void FightSlime(){
+        int monsThresholdMin = 60;
+        int monsThresholdMax = 110;
+        int monsThreshold = Random.Range(monsThresholdMin, monsThresholdMax+1);
+
+        int monsDefenseMin = 10;
+        int monsDefenseMax = 30;
+        int monsDefense = Random.Range(monsDefenseMin, monsDefenseMax+1);
+
+        int monsAttackMin = 35;
+        int monsAttackMax = 50;
+        int monsAttack = Random.Range(monsAttackMin, monsAttackMax+1);
+
+        int monsNumUnitEfficiency = 1;
+        int healingEfficiency = 1;
+        int defenseEfficiency = 1;
+        int monsAtkEfficiency = 5;
+        int monsAOEEfficiency = 1;
+
+        float unitsLeft = Fight(monsThreshold, monsDefense, monsAttack, monsNumUnitEfficiency, healingEfficiency, defenseEfficiency, monsAtkEfficiency, monsAOEEfficiency);
+        Debug.Log("You lost " + ((int)(warriorSlider.value - warriorSlider.value*unitsLeft)).ToString() + " warriors, " + ((int)(wizardSlider.value - wizardSlider.value*unitsLeft)).ToString() + " wizards, " + ((int)(priestSlider.value - priestSlider.value*unitsLeft)).ToString() + " priests.");
+        warrior.AddUnits(-1 * (int)(warriorSlider.value - warriorSlider.value*unitsLeft));
+        wizard.AddUnits(-1 * (int)(wizardSlider.value - wizardSlider.value*unitsLeft));
+        priest.AddUnits(-1 * (int)(priestSlider.value - priestSlider.value*unitsLeft));
+        MainUIScreen();
+        if(unitsLeft <= 0){
+            BattleLost();
+            return;
+        }
+        else if(unitsLeft >= 0.85f){
+            unitsLeft = Random.Range(0.7f, 0.85f);
+        }
+        Debug.Log("Battle won with " + unitsLeft.ToString() + " units left!");
+        unlockedIndex++;
+        if(unlockedIndex < battles.Length){
+            battles[unlockedIndex].SetActive(true);
+        }
+    }
+
+    private void BattleLost(){
+        Debug.Log("Battle lost!");
+    }
 }
