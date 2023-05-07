@@ -63,6 +63,15 @@ public class GameManager : MonoBehaviour
     private GameObject wizardObj;
     [SerializeField]
     private GameObject priestObj;
+
+    [Header("Reward UI Related")]
+    [SerializeField]
+    private GameObject rewardsUI; 
+    public TMP_Text outcomeText;
+    public TMP_Text casualtyText;
+    public TMP_Text rewardText;
+    public TMP_Text monsterTitleText;
+
     private int chariotCap = 50;
     private int chariotWarCost = 300;
     private int chariotWizCost = 0;
@@ -112,6 +121,7 @@ public class GameManager : MonoBehaviour
         mainUIScreen.SetActive(false);
         curBattleIndex = battleIndex;
         battleTitleText.text = title[battleIndex];
+        monsterTitleText.text = title[battleIndex];
         battleDescriptionText.text = descriptions[battleIndex];
         string newRewardText = "";
         for(int i = 0; i < rewardsPercent[battleIndex].array.Length; i++){
@@ -127,6 +137,7 @@ public class GameManager : MonoBehaviour
     }
 
     public void MainUIScreen(){
+        rewardsUI.SetActive(false);
         battleScreen.SetActive(false);
         mainUIScreen.SetActive(true);
         ResetSliders();
@@ -204,17 +215,19 @@ public class GameManager : MonoBehaviour
     }
 
     public void StartBattle(){
-        switch(curBattleIndex){
+        if((warriorSlider.value <= warrior.GetNumUnits() && wizardSlider.value <= wizard.GetNumUnits() && priestSlider.value <= priest.GetNumUnits()) && (warriorSlider.value > 0 || wizardSlider.value > 0 || priestSlider.value > 0)){
+            switch(curBattleIndex){
             case 0:
                 FightSlime();
                 break;
-        }
-        wizardSlider.value = 0;
-        warriorSlider.value = 0;
-        priestSlider.value = 0;
-        prevPriestValue = 0;
-        prevWarValue = 0;
-        prevWizValue = 0;
+            }
+            wizardSlider.value = 0;
+            warriorSlider.value = 0;
+            priestSlider.value = 0;
+            prevPriestValue = 0;
+            prevWarValue = 0;
+            prevWizValue = 0;
+        }  
     }
 
     private float Fight(int monsThreshold, int monsDefense, int monsAttack, int monsNumUnitEfficiency, int healingEfficiency, int defenseEfficiency, int monsAtkEfficiency, int monsAOEEfficiency){
@@ -235,7 +248,7 @@ public class GameManager : MonoBehaviour
             float survivabilityValue = ((warrior.GetDef()*warriorSlider.value + wizard.GetDef()*wizardSlider.value + priest.GetDef()*priestSlider.value) * defenseEfficiency) + ((warrior.GetHealing()*warriorSlider.value + wizard.GetHealing()*wizardSlider.value + priest.GetHealing()*priestSlider.value) * healingEfficiency);
             y = PercentUnitsLeft(numUnits, survivabilityValue, monsAttack, monsNumUnitEfficiency);
             if(y <= 0){
-                return 0;
+                return -1;
             }      
             else{
                 return y;
@@ -243,7 +256,7 @@ public class GameManager : MonoBehaviour
         }
                 
         else{
-            return 0;
+            return -2;
         }
     }
 
@@ -260,33 +273,89 @@ public class GameManager : MonoBehaviour
         int monsAttackMax = 50;
         int monsAttack = Random.Range(monsAttackMin, monsAttackMax+1);
 
+        //0 - 1
         int monsNumUnitEfficiency = 1;
         int healingEfficiency = 1;
         int defenseEfficiency = 1;
+
+        //0 - 5
         int monsAtkEfficiency = 5;
         int monsAOEEfficiency = 1;
 
         float unitsLeft = Fight(monsThreshold, monsDefense, monsAttack, monsNumUnitEfficiency, healingEfficiency, defenseEfficiency, monsAtkEfficiency, monsAOEEfficiency);
-        Debug.Log("You lost " + ((int)(warriorSlider.value - warriorSlider.value*unitsLeft)).ToString() + " warriors, " + ((int)(wizardSlider.value - wizardSlider.value*unitsLeft)).ToString() + " wizards, " + ((int)(priestSlider.value - priestSlider.value*unitsLeft)).ToString() + " priests.");
-        warrior.AddUnits(-1 * (int)(warriorSlider.value - warriorSlider.value*unitsLeft));
-        wizard.AddUnits(-1 * (int)(wizardSlider.value - wizardSlider.value*unitsLeft));
-        priest.AddUnits(-1 * (int)(priestSlider.value - priestSlider.value*unitsLeft));
-        MainUIScreen();
+        
+        int index = FightAftermath(unitsLeft);
+        battleScreen.SetActive(false);
+        rewardsUI.SetActive(true);
+        
+        //outcomeText; casualtyText; rewardText;
+        //show upgrade panel, then switch to main UI after a while
+        switch(index){
+            case -2:
+                Debug.Log("SHOULD NEVER SEE THIS!");
+                break;
+            case -1:
+                rewardText.text = "No Reward!";
+                break;
+            
+            case 0:
+                rewardText.text = "Your warriors used some of the Slime's goo to upgrade their armor:\n+Warrior Def!";
+                warrior.SetDef(warrior.GetDef() + 1);
+                break;
+            case 1:
+                rewardText.text = "Your warriors used some of the Slime's goo to sharpen their swords!:\n+Warrior Atk!";
+                warrior.SetAtk(warrior.GetAtk() + 1);
+                break;
+
+            default:
+                Debug.Log("WEIRD.. SHOULDNT HAPPEN EITHER");
+                break;
+        }
+    }
+
+    private int FightAftermath(float unitsLeft){
+        outcomeText.text = "You sent out " + warriorSlider.value.ToString() + " warriors, " + wizardSlider.value.ToString() + " wizards and " + priestSlider.value.ToString() + " priests out to take down the " + title[curBattleIndex] + ", and they emerged victorious!";
+        casualtyText.text = "These were the casualties from this battle:\n- " + ((int)(warriorSlider.value - warriorSlider.value*unitsLeft)).ToString() + " warriors,\n- " + ((int)(wizardSlider.value - wizardSlider.value*unitsLeft)).ToString() + " wizards,\n- " + ((int)(priestSlider.value - priestSlider.value*unitsLeft)).ToString() + " priests";
+
         if(unitsLeft <= 0){
-            BattleLost();
-            return;
+            BattleLost(unitsLeft);
+            return -1;
         }
         else if(unitsLeft >= 0.85f){
             unitsLeft = Random.Range(0.7f, 0.85f);
         }
-        Debug.Log("Battle won with " + unitsLeft.ToString() + " units left!");
+
+        warrior.AddUnits(-1 * (int)(warriorSlider.value - warriorSlider.value*unitsLeft));
+        wizard.AddUnits(-1 * (int)(wizardSlider.value - wizardSlider.value*unitsLeft));
+        priest.AddUnits(-1 * (int)(priestSlider.value - priestSlider.value*unitsLeft));
+
         unlockedIndex++;
         if(unlockedIndex < battles.Length){
             battles[unlockedIndex].SetActive(true);
         }
+        int rand = Random.Range(1, 101);
+        float sum = 0;
+        for(int i = 0; i < rewardsPercent[curBattleIndex].array.Length; i++){
+            sum += rewardsPercent[curBattleIndex].array[i];
+            if(sum >= rand){
+                return i;
+            }
+        }
+        return -2;
     }
 
-    private void BattleLost(){
-        Debug.Log("Battle lost!");
+    private void BattleLost(float unitsLost){
+        casualtyText.text = "These were the casualties from this battle:\n- " + ((int)(warriorSlider.value)).ToString() + " warriors,\n- " + ((int)(wizardSlider.value)).ToString() + " wizards,\n- " + ((int)(priestSlider.value)).ToString() + " priests";
+        //too weak attack wise
+        if(unitsLost == -2){
+            outcomeText.text = "You sent out " + warriorSlider.value.ToString() + " warriors, " + wizardSlider.value.ToString() + " wizards and " + priestSlider.value.ToString() + " priests out to take down the " + title[curBattleIndex] + ", but they were not strong enough! They will never return home.";
+        }
+        //too weak defense wise
+        else{
+            outcomeText.text = "You sent out " + warriorSlider.value.ToString() + " warriors, " + wizardSlider.value.ToString() + " wizards and " + priestSlider.value.ToString() + " priests out to take down the " + title[curBattleIndex] + ", but they were not resilient enough! The " + title[curBattleIndex] + " was able to defeat them swiftly.";
+        }
+        warrior.AddUnits(-1 * (int)(warriorSlider.value));
+        wizard.AddUnits(-1 * (int)(wizardSlider.value));
+        priest.AddUnits(-1 * (int)(priestSlider.value));
     }
 }

@@ -74,4 +74,24 @@ public class Unit : MonoBehaviour
     public int GetHealing(){
         return healing;
     }
+
+    public void SetAtk(int newVal){
+        atk = newVal;
+        UpdateText();
+    }
+
+    public void SetDef(int newVal){
+        def = newVal;
+        UpdateText();
+    }
+
+    public void SetAOE(int newVal){
+        aoe = newVal;
+        UpdateText();
+    }
+
+    public void SetHealing(int newVal){
+        healing = newVal;
+        UpdateText();
+    }
 }
