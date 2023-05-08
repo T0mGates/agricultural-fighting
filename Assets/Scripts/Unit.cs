@@ -44,7 +44,7 @@ public class Unit : MonoBehaviour
     }
 
     public void AddUnits(){
-        numUnits += 1 + bonusOnClick;
+        numUnits += 100 + bonusOnClick;
         UpdateText();
     }
     public void AddUnits(int numToAdd){

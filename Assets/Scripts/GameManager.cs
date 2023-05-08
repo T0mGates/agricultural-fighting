@@ -6,6 +6,9 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    private int curPage = 1;
+    [SerializeField]
+    private int maxPages;
     [System.Serializable]
     public class TwoDimensionalFloatArray{
         public float[] array;
@@ -39,6 +42,7 @@ public class GameManager : MonoBehaviour
     private Unit priest;
 
     [Header("UI Related")]
+    public GameObject[] pages;
     public TMP_Text chariotCapText;
     public TMP_Text chariotCapTextTwo;
     public TMP_Text chariotUpgradeText;
@@ -90,6 +94,23 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         
+    }
+
+    public void NextPage(){
+        if(curPage == maxPages){
+            curPage = 1;
+        }
+        else{
+            curPage++;
+        }
+        ChangePage();
+    }
+
+    private void ChangePage(){
+        for(int i = 0; i < pages.Length; i++){
+            pages[i].SetActive(false);
+        }
+        pages[curPage-1].SetActive(true);
     }
 
     public void ChariotUpgrade(){
