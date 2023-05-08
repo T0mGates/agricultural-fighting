@@ -220,6 +220,9 @@ public class GameManager : MonoBehaviour
             case 0:
                 FightSlime();
                 break;
+            case 1:
+                FightGoblin();
+                break;
             }
             wizardSlider.value = 0;
             warriorSlider.value = 0;
@@ -230,7 +233,7 @@ public class GameManager : MonoBehaviour
         }  
     }
 
-    private float Fight(int monsThreshold, int monsDefense, int monsAttack, int monsNumUnitEfficiency, int healingEfficiency, int defenseEfficiency, int monsAtkEfficiency, int monsAOEEfficiency){
+    private float Fight(int monsThreshold, int monsDefense, int monsAttack, float monsNumUnitEfficiency, float healingEfficiency, float defenseEfficiency, float monsAtkEfficiency, float monsAOEEfficiency){
         float x = (warriorSlider.value * warrior.GetAtk()) + (wizardSlider.value * wizard.GetAtk()) + (priestSlider.value * priest.GetAtk());
         float a = monsDefense;
         float z = monsAtkEfficiency;
@@ -257,59 +260,6 @@ public class GameManager : MonoBehaviour
                 
         else{
             return -2;
-        }
-    }
-
-    private void FightSlime(){
-        int monsThresholdMin = 60;
-        int monsThresholdMax = 110;
-        int monsThreshold = Random.Range(monsThresholdMin, monsThresholdMax+1);
-
-        int monsDefenseMin = 10;
-        int monsDefenseMax = 30;
-        int monsDefense = Random.Range(monsDefenseMin, monsDefenseMax+1);
-
-        int monsAttackMin = 35;
-        int monsAttackMax = 50;
-        int monsAttack = Random.Range(monsAttackMin, monsAttackMax+1);
-
-        //0 - 1
-        int monsNumUnitEfficiency = 1;
-        int healingEfficiency = 1;
-        int defenseEfficiency = 1;
-
-        //0 - 5
-        int monsAtkEfficiency = 5;
-        int monsAOEEfficiency = 1;
-
-        float unitsLeft = Fight(monsThreshold, monsDefense, monsAttack, monsNumUnitEfficiency, healingEfficiency, defenseEfficiency, monsAtkEfficiency, monsAOEEfficiency);
-        
-        int index = FightAftermath(unitsLeft);
-        battleScreen.SetActive(false);
-        rewardsUI.SetActive(true);
-        
-        //outcomeText; casualtyText; rewardText;
-        //show upgrade panel, then switch to main UI after a while
-        switch(index){
-            case -2:
-                Debug.Log("SHOULD NEVER SEE THIS!");
-                break;
-            case -1:
-                rewardText.text = "No Reward!";
-                break;
-            
-            case 0:
-                rewardText.text = "Your warriors used some of the Slime's goo to upgrade their armor:\n+Warrior Def!";
-                warrior.SetDef(warrior.GetDef() + 1);
-                break;
-            case 1:
-                rewardText.text = "Your warriors used some of the Slime's goo to sharpen their swords!:\n+Warrior Atk!";
-                warrior.SetAtk(warrior.GetAtk() + 1);
-                break;
-
-            default:
-                Debug.Log("WEIRD.. SHOULDNT HAPPEN EITHER");
-                break;
         }
     }
 
@@ -348,7 +298,7 @@ public class GameManager : MonoBehaviour
         casualtyText.text = "These were the casualties from this battle:\n- " + ((int)(warriorSlider.value)).ToString() + " warriors,\n- " + ((int)(wizardSlider.value)).ToString() + " wizards,\n- " + ((int)(priestSlider.value)).ToString() + " priests";
         //too weak attack wise
         if(unitsLost == -2){
-            outcomeText.text = "You sent out " + warriorSlider.value.ToString() + " warriors, " + wizardSlider.value.ToString() + " wizards and " + priestSlider.value.ToString() + " priests out to take down the " + title[curBattleIndex] + ", but they were not strong enough! They will never return home.";
+            outcomeText.text = "You sent out " + warriorSlider.value.ToString() + " warriors, " + wizardSlider.value.ToString() + " wizards and " + priestSlider.value.ToString() + " priests out to take down the " + title[curBattleIndex] + ", but they were not strong enough! They simply could not take the " + title[curBattleIndex] + " down!";
         }
         //too weak defense wise
         else{
@@ -357,5 +307,111 @@ public class GameManager : MonoBehaviour
         warrior.AddUnits(-1 * (int)(warriorSlider.value));
         wizard.AddUnits(-1 * (int)(wizardSlider.value));
         priest.AddUnits(-1 * (int)(priestSlider.value));
+    }
+
+    private void FightSlime(){
+        int monsThresholdMin = 60;
+        int monsThresholdMax = 100;
+        int monsThreshold = Random.Range(monsThresholdMin, monsThresholdMax+1);
+
+        int monsDefenseMin = 10;
+        int monsDefenseMax = 25;
+        int monsDefense = Random.Range(monsDefenseMin, monsDefenseMax+1);
+
+        int monsAttackMin = 15;
+        int monsAttackMax = 25;
+        int monsAttack = Random.Range(monsAttackMin, monsAttackMax+1);
+
+        //0 - 1
+        float monsNumUnitEfficiency = 1;
+        float healingEfficiency = 1;
+        float defenseEfficiency = 1;
+
+        //0 - 5
+        float monsAtkEfficiency = 5;
+        float monsAOEEfficiency = 1;
+
+        float unitsLeft = Fight(monsThreshold, monsDefense, monsAttack, monsNumUnitEfficiency, healingEfficiency, defenseEfficiency, monsAtkEfficiency, monsAOEEfficiency);
+        
+        int index = FightAftermath(unitsLeft);
+        battleScreen.SetActive(false);
+        rewardsUI.SetActive(true);
+        
+        //outcomeText; casualtyText; rewardText;
+        //show upgrade panel, then switch to main UI after a while
+        switch(index){
+            case -2:
+                Debug.Log("SHOULD NEVER SEE THIS!");
+                break;
+            case -1:
+                rewardText.text = "No Reward!";
+                break;
+            
+            case 0:
+                rewardText.text = "Your warriors used some of the Slime's goo to upgrade their armor:\n+Warrior Def!";
+                warrior.SetDef(warrior.GetDef() + 1);
+                break;
+            case 1:
+                rewardText.text = "Your warriors used some of the Slime's goo to sharpen their swords!:\n+Warrior Atk!";
+                warrior.SetAtk(warrior.GetAtk() + 1);
+                break;
+
+            default:
+                Debug.Log("WEIRD.. SHOULDNT HAPPEN EITHER");
+                break;
+        }
+    }
+
+    private void FightGoblin(){
+        int monsThresholdMin = 80;
+        int monsThresholdMax = 120;
+        int monsThreshold = Random.Range(monsThresholdMin, monsThresholdMax+1);
+
+        int monsDefenseMin = 15;
+        int monsDefenseMax = 30;
+        int monsDefense = Random.Range(monsDefenseMin, monsDefenseMax+1);
+
+        int monsAttackMin = 30;
+        int monsAttackMax = 45;
+        int monsAttack = Random.Range(monsAttackMin, monsAttackMax+1);
+
+        //0 - 1
+        float monsNumUnitEfficiency = 1;
+        float healingEfficiency = .5f;
+        float defenseEfficiency = .8f;
+
+        //0 - 5
+        float monsAtkEfficiency = 5;
+        float monsAOEEfficiency = 1;
+
+        float unitsLeft = Fight(monsThreshold, monsDefense, monsAttack, monsNumUnitEfficiency, healingEfficiency, defenseEfficiency, monsAtkEfficiency, monsAOEEfficiency);
+        
+        int index = FightAftermath(unitsLeft);
+        battleScreen.SetActive(false);
+        rewardsUI.SetActive(true);
+        
+        //outcomeText; casualtyText; rewardText;
+        //show upgrade panel, then switch to main UI after a while
+        switch(index){
+            case -2:
+                Debug.Log("SHOULD NEVER SEE THIS!");
+                break;
+            case -1:
+                rewardText.text = "No Reward!";
+                break;
+            
+            case 0:
+                rewardText.text = "Your warriors used some of the Goblin's teeth to make sharper swords:\n++Warrior Atk";
+                warrior.SetAtk(warrior.GetAtk() + 2);
+                break;
+            case 1:
+                rewardText.text = "Your warriors used some of the Goblin's dagger's shards to enhance their swords:\n+Warrior Atk!";
+                warrior.SetAtk(warrior.GetAtk() + 1);
+                break;
+
+            default:
+                Debug.Log("WEIRD.. SHOULDNT HAPPEN EITHER");
+                break;
+        }
     }
 }

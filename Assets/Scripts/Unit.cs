@@ -6,6 +6,7 @@ using TMPro;
 
 public class Unit : MonoBehaviour
 {
+    private int bonusOnClick = 0;
     private int numUnits;
     [Header("Unit Stats")]
     [SerializeField]
@@ -38,8 +39,12 @@ public class Unit : MonoBehaviour
         
     }
 
+    public void AddBonusOnClick(int val){
+        bonusOnClick += val;
+    }
+
     public void AddUnits(){
-        numUnits += 100;
+        numUnits += 100 + bonusOnClick;
         UpdateText();
     }
     public void AddUnits(int numToAdd){

@@ -58,6 +58,32 @@ public class UnitManager : MonoBehaviour
         }
     }
 
+    public void UpgradeClick(string type){
+        //type can = warrior, wizard, priest
+        switch(type){
+            case "warrior":
+                if(unit.GetAtk() > 1 && unit.GetDef() > 1){
+                    unit.SetAtk(unit.GetAtk() - 1);
+                    unit.SetDef(unit.GetDef() - 1);
+                    unit.AddBonusOnClick(1);
+                }
+                break;
+            case "wizard":
+                if(unit.GetAtk() > 1 && unit.GetAOE() > 1){
+                    unit.SetAtk(unit.GetAtk() - 1);
+                    unit.SetAOE(unit.GetAOE() - 1);
+                    unit.AddBonusOnClick(1);
+                }
+                break;
+            case "priest":
+                if(unit.GetHealing() > 2){
+                    unit.SetHealing(unit.GetHealing() - 2);
+                    unit.AddBonusOnClick(1);
+                }
+                break;
+        }
+    }
+
     public void PlantHeads(){
         if(unit.GetNumUnits() >= costPlant){
             unit.AddUnits(-costPlant);
