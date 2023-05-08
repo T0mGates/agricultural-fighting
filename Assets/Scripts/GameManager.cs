@@ -193,23 +193,23 @@ public class GameManager : MonoBehaviour
     }
 
     public void UnlockWizards(){
-        if(warrior.GetNumUnits() >= 10){
-            warrior.AddUnits(-10);
+        if(warrior.GetNumUnits() >= 1000){
+            warrior.AddUnits(-1000);
             wizardUnlock.SetActive(false);
             wizardObj.SetActive(true);
         }
     }
 
     public void UnlockPriests(){
-        if(wizard.GetNumUnits() >= 10){
-            wizard.AddUnits(-10);
+        if(wizard.GetNumUnits() >= 1000){
+            wizard.AddUnits(-1000);
             priestUnlock.SetActive(false);
             priestObj.SetActive(true);
         }
     }
 
     private float PercentUnitsLeft(int units, float survivability, int monsterAtk, float unitEfficiency){
-        float result = Mathf.Log(units) * (-1 * unitEfficiency) / (Mathf.Log(Mathf.Pow(monsterAtk, survivability)) - Mathf.Log(monsterAtk));
+        float result = Mathf.Log(units) * (-1 * unitEfficiency) / ((Mathf.Pow(Mathf.Log(monsterAtk), Mathf.Log(survivability))) - Mathf.Log(monsterAtk));
         result = ((1-result) - (Mathf.Log(monsterAtk) / (Mathf.Log(monsterAtk*survivability) - Mathf.Log(monsterAtk))));
         return result;
     }
@@ -222,6 +222,12 @@ public class GameManager : MonoBehaviour
                 break;
             case 1:
                 FightGoblin();
+                break;
+            case 2:
+                FightSkeleton();
+                break;
+            case 3:
+                FightBats();
                 break;
             }
             wizardSlider.value = 0;
@@ -238,13 +244,13 @@ public class GameManager : MonoBehaviour
         float a = monsDefense;
         float z = monsAtkEfficiency;
 
-        float y = (x * (x - a))/z;
+        float y = (x * (x - a))/(6-z);
 
         x = (warriorSlider.value * warrior.GetAOE()) + (wizardSlider.value * wizard.GetAOE()) + (priestSlider.value * priest.GetAOE());
         a = monsDefense;
         z = monsAOEEfficiency;
 
-        float yPrime = (x * (x + a))/z;
+        float yPrime = (x * (x + a))/(6-z);
 
         if((yPrime + y) * (1 + ((priest.GetHealing() * priestSlider.value) * healingEfficiency)) > monsThreshold){
             int numUnits = (int)(warriorSlider.value + priestSlider.value + wizardSlider.value);
@@ -278,8 +284,9 @@ public class GameManager : MonoBehaviour
         warrior.AddUnits(-1 * (int)(warriorSlider.value - warriorSlider.value*unitsLeft));
         wizard.AddUnits(-1 * (int)(wizardSlider.value - wizardSlider.value*unitsLeft));
         priest.AddUnits(-1 * (int)(priestSlider.value - priestSlider.value*unitsLeft));
-
-        unlockedIndex++;
+        if(curBattleIndex == unlockedIndex){
+            unlockedIndex++;
+        }
         if(unlockedIndex < battles.Length){
             battles[unlockedIndex].SetActive(true);
         }
@@ -309,17 +316,19 @@ public class GameManager : MonoBehaviour
         priest.AddUnits(-1 * (int)(priestSlider.value));
     }
 
+
+    //very disgusting copy pastes, just can't bother as this is a simple low fidelity prototype
     private void FightSlime(){
         int monsThresholdMin = 60;
         int monsThresholdMax = 100;
         int monsThreshold = Random.Range(monsThresholdMin, monsThresholdMax+1);
 
-        int monsDefenseMin = 10;
-        int monsDefenseMax = 25;
+        int monsDefenseMin = 20;
+        int monsDefenseMax = 33;
         int monsDefense = Random.Range(monsDefenseMin, monsDefenseMax+1);
 
-        int monsAttackMin = 15;
-        int monsAttackMax = 25;
+        int monsAttackMin = 23;
+        int monsAttackMax = 35;
         int monsAttack = Random.Range(monsAttackMin, monsAttackMax+1);
 
         //0 - 1
@@ -367,12 +376,12 @@ public class GameManager : MonoBehaviour
         int monsThresholdMax = 120;
         int monsThreshold = Random.Range(monsThresholdMin, monsThresholdMax+1);
 
-        int monsDefenseMin = 15;
-        int monsDefenseMax = 30;
+        int monsDefenseMin = 28;
+        int monsDefenseMax = 40;
         int monsDefense = Random.Range(monsDefenseMin, monsDefenseMax+1);
 
-        int monsAttackMin = 30;
-        int monsAttackMax = 45;
+        int monsAttackMin = 38;
+        int monsAttackMax = 50;
         int monsAttack = Random.Range(monsAttackMin, monsAttackMax+1);
 
         //0 - 1
@@ -409,6 +418,122 @@ public class GameManager : MonoBehaviour
                 warrior.SetAtk(warrior.GetAtk() + 1);
                 break;
 
+            default:
+                Debug.Log("WEIRD.. SHOULDNT HAPPEN EITHER");
+                break;
+        }
+    }
+
+    private void FightSkeleton(){
+        int monsThresholdMin = 80;
+        int monsThresholdMax = 120;
+        int monsThreshold = Random.Range(monsThresholdMin, monsThresholdMax+1);
+
+        int monsDefenseMin = 28;
+        int monsDefenseMax = 40;
+        int monsDefense = Random.Range(monsDefenseMin, monsDefenseMax+1);
+
+        int monsAttackMin = 38;
+        int monsAttackMax = 50;
+        int monsAttack = Random.Range(monsAttackMin, monsAttackMax+1);
+
+        //0 - 1
+        float monsNumUnitEfficiency = 1;
+        float healingEfficiency = .5f;
+        float defenseEfficiency = .8f;
+
+        //0 - 5
+        float monsAtkEfficiency = 5;
+        float monsAOEEfficiency = 1;
+
+        float unitsLeft = Fight(monsThreshold, monsDefense, monsAttack, monsNumUnitEfficiency, healingEfficiency, defenseEfficiency, monsAtkEfficiency, monsAOEEfficiency);
+        
+        int index = FightAftermath(unitsLeft);
+        battleScreen.SetActive(false);
+        rewardsUI.SetActive(true);
+        
+        //outcomeText; casualtyText; rewardText;
+        //show upgrade panel, then switch to main UI after a while
+        switch(index){
+            case -2:
+                Debug.Log("SHOULD NEVER SEE THIS!");
+                break;
+            case -1:
+                rewardText.text = "No Reward!";
+                break;
+            
+            case 0:
+                rewardText.text = "Your warriors used the Skeleton's impenetrable skull bones to strengthen their armor:\n+++Warrior Def";
+                warrior.SetAtk(warrior.GetDef() + 3);
+                break;
+                
+            case 1:
+                rewardText.text = "Your warriors used the Skeleton's strong ribcage bones to strengthen their armor:\n++Warrior Def";
+                warrior.SetAtk(warrior.GetDef() + 2);
+                break;
+                
+            case 2:
+                rewardText.text = "Your warriors used some of the Skeleton's flimsy finger bones to strengthen their armor:\n+Warrior Def!";
+                warrior.SetAtk(warrior.GetDef() + 1);
+                break;
+
+            default:
+                Debug.Log("WEIRD.. SHOULDNT HAPPEN EITHER");
+                break;
+        }
+    }
+
+    private void FightBats(){
+        int monsThresholdMin = 115;
+        int monsThresholdMax = 135;
+        int monsThreshold = Random.Range(monsThresholdMin, monsThresholdMax+1);
+
+        int monsDefenseMin = 50;
+        int monsDefenseMax = 60;
+        int monsDefense = Random.Range(monsDefenseMin, monsDefenseMax+1);
+
+        int monsAttackMin = 140;
+        int monsAttackMax = 180;
+        int monsAttack = Random.Range(monsAttackMin, monsAttackMax+1);
+
+        //0 - 1
+        float monsNumUnitEfficiency = 1;
+        float healingEfficiency = .8f;
+        float defenseEfficiency = .8f;
+
+        //0 - 5
+        float monsAtkEfficiency = 3;
+        float monsAOEEfficiency = 3;
+
+        float unitsLeft = Fight(monsThreshold, monsDefense, monsAttack, monsNumUnitEfficiency, healingEfficiency, defenseEfficiency, monsAtkEfficiency, monsAOEEfficiency);
+        
+        int index = FightAftermath(unitsLeft);
+        battleScreen.SetActive(false);
+        rewardsUI.SetActive(true);
+        
+        //outcomeText; casualtyText; rewardText;
+        //show upgrade panel, then switch to main UI after a while
+        switch(index){
+            case -2:
+                Debug.Log("SHOULD NEVER SEE THIS!");
+                break;
+            case -1:
+                rewardText.text = "No Reward!";
+                break;
+            
+            case 0:
+                rewardText.text = "Your warriors used some of the Bats' knife-sharp teeth to make sharper swords and armor:\n+Warrior Atk, +Warrior Def";
+                warrior.SetAtk(warrior.GetAtk() + 1);
+                warrior.SetDef(warrior.GetDef() + 1);
+                break;
+            case 1:
+                rewardText.text = "Your wizards used some of the Bats' magical wings to learn new spells:\n+Wizard AOE!";
+                wizard.SetAOE(wizard.GetAOE() + 1);
+                break;
+             case 2:
+                rewardText.text = "Your wizards used some of the Bats' toenails to strengthen their staffs:\n+Wizard Atk!";
+                wizard.SetAtk(wizard.GetAtk() + 1);
+                break;
             default:
                 Debug.Log("WEIRD.. SHOULDNT HAPPEN EITHER");
                 break;

@@ -87,16 +87,16 @@ public class UnitManager : MonoBehaviour
     public void PlantHeads(){
         if(unit.GetNumUnits() >= costPlant){
             unit.AddUnits(-costPlant);
-            costPlant *= 4;
+            costPlant *= 2;
             UpdateText(); 
-            numPerInterval*=2;
+            numPerInterval = (int)(numPerInterval * 2);
         }
     }
 
     public void HireFarmer(){
         if(unit.GetNumUnits() >= costHire){
             unit.AddUnits(-costHire);
-            costHire *= 7;
+            costHire *= 3;
             UpdateText(); 
             if(interval == -1){
             interval = startInterval;
