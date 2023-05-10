@@ -120,18 +120,18 @@ public class GameManager : MonoBehaviour
             priest.AddUnits(-chariotPriestCost);
             chariotCap = (int)(chariotCap * 1.5f);
 
-            chariotWarCost = (int)(chariotWarCost * 2.5f);
+            chariotWarCost = (int)(chariotWarCost * 1.8f);
             if(chariotWizCost == 0 && chariotWarCost >= 2000){
                 chariotWizCost = 200;
             }
             else{
-                chariotWizCost = (int)(chariotWizCost * 1.95f);
+                chariotWizCost = (int)(chariotWizCost * 1.7f);
             }
             if(chariotPriestCost == 0 && chariotWizCost >= 2000){
                 chariotPriestCost = 150;
             }
             else{
-                chariotPriestCost = (int)(chariotPriestCost * 1.75f);
+                chariotPriestCost = (int)(chariotPriestCost * 1.6f);
             }
         }
         UpdateText();
@@ -214,16 +214,16 @@ public class GameManager : MonoBehaviour
     }
 
     public void UnlockWizards(){
-        if(warrior.GetNumUnits() >= 1000){
-            warrior.AddUnits(-1000);
+        if(warrior.GetNumUnits() >= 300){
+            warrior.AddUnits(-300);
             wizardUnlock.SetActive(false);
             wizardObj.SetActive(true);
         }
     }
 
     public void UnlockPriests(){
-        if(wizard.GetNumUnits() >= 1000){
-            wizard.AddUnits(-1000);
+        if(wizard.GetNumUnits() >= 300){
+            wizard.AddUnits(-300);
             priestUnlock.SetActive(false);
             priestObj.SetActive(true);
         }
@@ -248,7 +248,25 @@ public class GameManager : MonoBehaviour
                 FightSkeleton();
                 break;
             case 3:
+                FightUndead();
+                break;
+            case 4:
                 FightBats();
+                break;
+            case 5:
+                FightEvilKnights();
+                break;
+            case 6:
+                FightHellsAssassin();
+                break;
+            case 7:
+                FightBabyDragons();
+                break;
+            case 8:
+                FightElderDragon();
+                break;
+            case 9:
+                FightGodOfDeath();
                 break;
             }
             wizardSlider.value = 0;
@@ -401,8 +419,8 @@ public class GameManager : MonoBehaviour
         int monsDefenseMax = 40;
         int monsDefense = Random.Range(monsDefenseMin, monsDefenseMax+1);
 
-        int monsAttackMin = 38;
-        int monsAttackMax = 50;
+        int monsAttackMin = 45;
+        int monsAttackMax = 58;
         int monsAttack = Random.Range(monsAttackMin, monsAttackMax+1);
 
         //0 - 1
@@ -450,8 +468,8 @@ public class GameManager : MonoBehaviour
         int monsThresholdMax = 120;
         int monsThreshold = Random.Range(monsThresholdMin, monsThresholdMax+1);
 
-        int monsDefenseMin = 28;
-        int monsDefenseMax = 40;
+        int monsDefenseMin = 36;
+        int monsDefenseMax = 44;
         int monsDefense = Random.Range(monsDefenseMin, monsDefenseMax+1);
 
         int monsAttackMin = 38;
@@ -485,17 +503,81 @@ public class GameManager : MonoBehaviour
             
             case 0:
                 rewardText.text = "Your warriors used the Skeleton's impenetrable skull bones to strengthen their armor:\n+++Warrior Def";
-                warrior.SetAtk(warrior.GetDef() + 3);
+                warrior.SetDef(warrior.GetDef() + 3);
                 break;
                 
             case 1:
                 rewardText.text = "Your warriors used the Skeleton's strong ribcage bones to strengthen their armor:\n++Warrior Def";
-                warrior.SetAtk(warrior.GetDef() + 2);
+                warrior.SetDef(warrior.GetDef() + 2);
                 break;
                 
             case 2:
                 rewardText.text = "Your warriors used some of the Skeleton's flimsy finger bones to strengthen their armor:\n+Warrior Def!";
-                warrior.SetAtk(warrior.GetDef() + 1);
+                warrior.SetDef(warrior.GetDef() + 1);
+                break;
+
+            default:
+                Debug.Log("WEIRD.. SHOULDNT HAPPEN EITHER");
+                break;
+        }
+    }
+
+    private void FightUndead(){
+        int monsThresholdMin = 140;
+        int monsThresholdMax = 170;
+        int monsThreshold = Random.Range(monsThresholdMin, monsThresholdMax+1);
+
+        int monsDefenseMin = 60;
+        int monsDefenseMax = 68;
+        int monsDefense = Random.Range(monsDefenseMin, monsDefenseMax+1);
+
+        int monsAttackMin = 57;
+        int monsAttackMax = 65;
+        int monsAttack = Random.Range(monsAttackMin, monsAttackMax+1);
+
+        //0 - 1
+        float monsNumUnitEfficiency = 1;
+        float healingEfficiency = 1;
+        float defenseEfficiency = 1;
+
+        //0 - 5
+        float monsAtkEfficiency = 5;
+        float monsAOEEfficiency = 1;
+
+        float unitsLeft = Fight(monsThreshold, monsDefense, monsAttack, monsNumUnitEfficiency, healingEfficiency, defenseEfficiency, monsAtkEfficiency, monsAOEEfficiency);
+        
+        int index = FightAftermath(unitsLeft);
+        battleScreen.SetActive(false);
+        rewardsUI.SetActive(true);
+        
+        //outcomeText; casualtyText; rewardText;
+        //show upgrade panel, then switch to main UI after a while
+        switch(index){
+            case -2:
+                Debug.Log("SHOULD NEVER SEE THIS!");
+                break;
+            case -1:
+                rewardText.text = "No Reward!";
+                break;
+            
+            case 0:
+                rewardText.text = "Your warriors used the Undead's rotten teeth to sharpen their swords:\n+Warrior Atk";
+                warrior.SetAtk(warrior.GetAtk() + 1);
+                break;
+                
+            case 1:
+                rewardText.text = "Your warriors used the Undead's slimy flesh to strengthen their armor:\n+Warrior Def";
+                warrior.SetDef(warrior.GetDef() + 1);
+                break;
+
+            case 2:
+                rewardText.text = "Your warriors used the Undead's gold tooth to strengthen their swords:\n++Warrior Atk!";
+                warrior.SetAtk(warrior.GetAtk() + 2);
+                break;
+
+            case 3:
+                rewardText.text = "Your warriors used the Undead's strong skull bones to strengthen their armor:\n++Warrior Def!";
+                warrior.SetDef(warrior.GetDef() + 2);
                 break;
 
             default:
@@ -505,15 +587,15 @@ public class GameManager : MonoBehaviour
     }
 
     private void FightBats(){
-        int monsThresholdMin = 115;
-        int monsThresholdMax = 135;
+        int monsThresholdMin = 130;
+        int monsThresholdMax = 160;
         int monsThreshold = Random.Range(monsThresholdMin, monsThresholdMax+1);
 
-        int monsDefenseMin = 50;
-        int monsDefenseMax = 60;
+        int monsDefenseMin = 60;
+        int monsDefenseMax = 65;
         int monsDefense = Random.Range(monsDefenseMin, monsDefenseMax+1);
 
-        int monsAttackMin = 140;
+        int monsAttackMin = 150;
         int monsAttackMax = 180;
         int monsAttack = Random.Range(monsAttackMin, monsAttackMax+1);
 
@@ -554,6 +636,268 @@ public class GameManager : MonoBehaviour
              case 2:
                 rewardText.text = "Your wizards used some of the Bats' toenails to strengthen their staffs:\n+Wizard Atk!";
                 wizard.SetAtk(wizard.GetAtk() + 1);
+                break;
+            default:
+                Debug.Log("WEIRD.. SHOULDNT HAPPEN EITHER");
+                break;
+        }
+    }
+
+    private void FightEvilKnights(){
+        int monsThresholdMin = 200;
+        int monsThresholdMax = 230;
+        int monsThreshold = Random.Range(monsThresholdMin, monsThresholdMax+1);
+
+        int monsDefenseMin = 160;
+        int monsDefenseMax = 180;
+        int monsDefense = Random.Range(monsDefenseMin, monsDefenseMax+1);
+
+        int monsAttackMin = 140;
+        int monsAttackMax = 160;
+        int monsAttack = Random.Range(monsAttackMin, monsAttackMax+1);
+
+        //0 - 1
+        float monsNumUnitEfficiency = 1;
+        float healingEfficiency = 1;
+        float defenseEfficiency = 1;
+
+        //0 - 5
+        float monsAtkEfficiency = 2;
+        float monsAOEEfficiency = 4;
+
+        float unitsLeft = Fight(monsThreshold, monsDefense, monsAttack, monsNumUnitEfficiency, healingEfficiency, defenseEfficiency, monsAtkEfficiency, monsAOEEfficiency);
+        
+        int index = FightAftermath(unitsLeft);
+        battleScreen.SetActive(false);
+        rewardsUI.SetActive(true);
+        
+        //outcomeText; casualtyText; rewardText;
+        //show upgrade panel, then switch to main UI after a while
+        switch(index){
+            case -2:
+                Debug.Log("SHOULD NEVER SEE THIS!");
+                break;
+            case -1:
+                rewardText.text = "No Reward!";
+                break;
+            
+            case 0:
+                rewardText.text = "Your wizards used the Evil Knights' swords to sharpen their staffs:\n++Wizard Atk";
+                wizard.SetAtk(wizard.GetAtk() + 2);
+                break;
+            case 1:
+                rewardText.text = "Your wizards used some of the Evil Knights' dark energy to imbue their staffs with power:\n++Wizard AOE!";
+                wizard.SetAOE(wizard.GetAOE() + 2);
+                break;
+
+            default:
+                Debug.Log("WEIRD.. SHOULDNT HAPPEN EITHER");
+                break;
+        }
+    }
+    private void FightHellsAssassin(){
+        int monsThresholdMin = 170;
+        int monsThresholdMax = 200;
+        int monsThreshold = Random.Range(monsThresholdMin, monsThresholdMax+1);
+
+        int monsDefenseMin = 80;
+        int monsDefenseMax = 100;
+        int monsDefense = Random.Range(monsDefenseMin, monsDefenseMax+1);
+
+        int monsAttackMin = 250;
+        int monsAttackMax = 275;
+        int monsAttack = Random.Range(monsAttackMin, monsAttackMax+1);
+
+        //0 - 1
+        float monsNumUnitEfficiency = 1;
+        float healingEfficiency = .2f;
+        float defenseEfficiency = .5f;
+
+        //0 - 5
+        float monsAtkEfficiency = 5;
+        float monsAOEEfficiency = 1;
+
+        float unitsLeft = Fight(monsThreshold, monsDefense, monsAttack, monsNumUnitEfficiency, healingEfficiency, defenseEfficiency, monsAtkEfficiency, monsAOEEfficiency);
+        
+        int index = FightAftermath(unitsLeft);
+        battleScreen.SetActive(false);
+        rewardsUI.SetActive(true);
+        
+        //outcomeText; casualtyText; rewardText;
+        //show upgrade panel, then switch to main UI after a while
+        switch(index){
+            case -2:
+                Debug.Log("SHOULD NEVER SEE THIS!");
+                break;
+            case -1:
+                rewardText.text = "No Reward!";
+                break;
+            
+            case 0:
+                rewardText.text = "Your wizards learned how to defend themselves fighting hell's assassin:\n+Wizard Def";
+                wizard.SetDef(wizard.GetDef() + 1);
+                break;
+            case 1:
+                rewardText.text = "Your wizards gained some powers of hell:\n+Wizard Atk, +Wizard AOE!";
+                wizard.SetAOE(wizard.GetAOE() + 1);
+                wizard.SetAtk(wizard.GetAtk() + 1);
+                break;
+
+            default:
+                Debug.Log("WEIRD.. SHOULDNT HAPPEN EITHER");
+                break;
+        }
+    }
+    private void FightBabyDragons(){
+        int monsThresholdMin = 220;
+        int monsThresholdMax = 240;
+        int monsThreshold = Random.Range(monsThresholdMin, monsThresholdMax+1);
+
+        int monsDefenseMin = 180;
+        int monsDefenseMax = 200;
+        int monsDefense = Random.Range(monsDefenseMin, monsDefenseMax+1);
+
+        int monsAttackMin = 240;
+        int monsAttackMax = 260;
+        int monsAttack = Random.Range(monsAttackMin, monsAttackMax+1);
+
+        //0 - 1
+        float monsNumUnitEfficiency = .8f;
+        float healingEfficiency = .8f;
+        float defenseEfficiency = 1;
+
+        //0 - 5
+        float monsAtkEfficiency = 5;
+        float monsAOEEfficiency = 1;
+
+        float unitsLeft = Fight(monsThreshold, monsDefense, monsAttack, monsNumUnitEfficiency, healingEfficiency, defenseEfficiency, monsAtkEfficiency, monsAOEEfficiency);
+        
+        int index = FightAftermath(unitsLeft);
+        battleScreen.SetActive(false);
+        rewardsUI.SetActive(true);
+        
+        //outcomeText; casualtyText; rewardText;
+        //show upgrade panel, then switch to main UI after a while
+        switch(index){
+            case -2:
+                Debug.Log("SHOULD NEVER SEE THIS!");
+                break;
+            case -1:
+                rewardText.text = "No Reward!";
+                break;
+            
+            case 0:
+                rewardText.text = "Your wizards learned the baby dragons' fire spells:\n+++Wizard AOE";
+                wizard.SetAOE(wizard.GetAOE() + 3);
+                break;
+            case 1:
+                rewardText.text = "Your wizards discovered newfound power after being exposed the the baby dragons' spells:\n++Wizard AOE!";
+                wizard.SetAOE(wizard.GetAOE() + 2);
+                break;
+             case 2:
+                rewardText.text = "Your wizards got better at spell flinging:\n+Wizard AOE!";
+                wizard.SetAOE(wizard.GetAOE() + 1);
+                break;
+            default:
+                Debug.Log("WEIRD.. SHOULDNT HAPPEN EITHER");
+                break;
+        }
+    }
+    private void FightElderDragon(){
+        int monsThresholdMin = 400;
+        int monsThresholdMax = 440;
+        int monsThreshold = Random.Range(monsThresholdMin, monsThresholdMax+1);
+
+        int monsDefenseMin = 250;
+        int monsDefenseMax = 275;
+        int monsDefense = Random.Range(monsDefenseMin, monsDefenseMax+1);
+
+        int monsAttackMin = 320;
+        int monsAttackMax = 335;
+        int monsAttack = Random.Range(monsAttackMin, monsAttackMax+1);
+
+        //0 - 1
+        float monsNumUnitEfficiency = 0.75f;
+        float healingEfficiency = .75f;
+        float defenseEfficiency = .75f;
+
+        //0 - 5
+        float monsAtkEfficiency = 5;
+        float monsAOEEfficiency = 1;
+
+        float unitsLeft = Fight(monsThreshold, monsDefense, monsAttack, monsNumUnitEfficiency, healingEfficiency, defenseEfficiency, monsAtkEfficiency, monsAOEEfficiency);
+        
+        int index = FightAftermath(unitsLeft);
+        battleScreen.SetActive(false);
+        rewardsUI.SetActive(true);
+        
+        //outcomeText; casualtyText; rewardText;
+        //show upgrade panel, then switch to main UI after a while
+        switch(index){
+            case -2:
+                Debug.Log("SHOULD NEVER SEE THIS!");
+                break;
+            case -1:
+                rewardText.text = "No Reward!";
+                break;
+            
+            case 0:
+                rewardText.text = "Your priests used the dragon eye's liquid to imbue their tomes:\n++Priest Healing";
+                priest.SetHealing(priest.GetHealing() + 2);
+                break;
+            case 1:
+                rewardText.text = "Your priests contained some dragon fire for future fights:\n+Priest AOE!";
+                priest.SetAOE(priest.GetAOE() + 1);
+                break;
+             case 2:
+                rewardText.text = "Your priests used the dragon's saliva to imbue their tomes:\n+Priest Healing!";
+                priest.SetHealing(priest.GetHealing() + 1);
+                break;
+            default:
+                Debug.Log("WEIRD.. SHOULDNT HAPPEN EITHER");
+                break;
+        }
+    }
+    private void FightGodOfDeath(){
+        int monsThresholdMin = 700;
+        int monsThresholdMax = 700;
+        int monsThreshold = Random.Range(monsThresholdMin, monsThresholdMax+1);
+
+        int monsDefenseMin = 350;
+        int monsDefenseMax = 350;
+        int monsDefense = Random.Range(monsDefenseMin, monsDefenseMax+1);
+
+        int monsAttackMin = 400;
+        int monsAttackMax = 400;
+        int monsAttack = Random.Range(monsAttackMin, monsAttackMax+1);
+
+        //0 - 1
+        float monsNumUnitEfficiency = 0.4f;
+        float healingEfficiency = 1f;
+        float defenseEfficiency = 0.75f;
+
+        //0 - 5
+        float monsAtkEfficiency = 4;
+        float monsAOEEfficiency = 3;
+
+        float unitsLeft = Fight(monsThreshold, monsDefense, monsAttack, monsNumUnitEfficiency, healingEfficiency, defenseEfficiency, monsAtkEfficiency, monsAOEEfficiency);
+        
+        int index = FightAftermath(unitsLeft);
+        battleScreen.SetActive(false);
+        rewardsUI.SetActive(true);
+        
+        //outcomeText; casualtyText; rewardText;
+        //show upgrade panel, then switch to main UI after a while
+        switch(index){
+            case -2:
+                Debug.Log("SHOULD NEVER SEE THIS!");
+                break;
+            case -1:
+                rewardText.text = "No Reward!";
+                break;
+            
+            case 0:
+                rewardText.text = "You've gained eternal life. Good game.";
                 break;
             default:
                 Debug.Log("WEIRD.. SHOULDNT HAPPEN EITHER");
